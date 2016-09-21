@@ -38,6 +38,13 @@
             var text = this.getField("itemText");
             this.model.addTodo(text);
         },
+        checkForEnter: function(e) {
+          if (e.keyCode == 13) {
+              e.preventDefault();
+              e.stopImmediatePropagation();
+              this.addTodo(e);
+          }  
+        },
     });
 
     SCF.registerComponent('scf-todo/components/hbs/todos', TodoList, TodoListView);

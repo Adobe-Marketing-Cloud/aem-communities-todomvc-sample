@@ -7,6 +7,9 @@
             var success = function(response) {
                 that.log.debug("added item");
                 that.log.debug(response.response);
+                var items = _.clone(that.get("items")) || [];
+                items.unshift(response.response);
+                that.set({"items":items});
             };
             var error = function(e) {
                 that.log.error("Unable to add item");

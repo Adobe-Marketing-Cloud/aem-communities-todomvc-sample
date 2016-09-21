@@ -12,6 +12,9 @@ import org.apache.sling.servlets.post.PostOperation;
 
 import com.adobe.aem.social.todomvc.api.TodoOperations;
 import com.adobe.cq.social.scf.OperationException;
+import com.adobe.cq.social.scf.SocialComponent;
+import com.adobe.cq.social.scf.SocialComponentFactory;
+import com.adobe.cq.social.scf.SocialComponentFactoryManager;
 import com.adobe.cq.social.scf.SocialOperationResult;
 import com.adobe.cq.social.scf.core.operations.AbstractSocialOperation;
 
@@ -23,10 +26,18 @@ public class CreateOperation extends AbstractSocialOperation {
     @Reference
     private TodoOperations todos;
 
+    @Reference
+    private SocialComponentFactoryManager scfm;
+
     @Override
     protected SocialOperationResult performOperation(SlingHttpServletRequest request) throws OperationException {
         final Resource item = this.todos.create(request);
-        return new SocialOperationResult(null, "created item", HttpServletResponse.SC_OK, request.getResource()
-            .getPath());
+        return new SocialOperationResult(getSocialComponent(item, request), "created item",
+            HttpServletResponse.SC_OK, request.getResource().getPath());
+    }
+
+    private SocialComponent getSocialComponent(final Resource item, final SlingHttpServletRequest req) {
+        final SocialComponentFactory scf = scfm.getSocialComponentFactory(item);
+        return scf.getSocialComponent(item, req);
     }
 }

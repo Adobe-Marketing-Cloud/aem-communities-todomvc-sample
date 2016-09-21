@@ -34,6 +34,10 @@
             this.listenTo(this.model, "change", this.render);
             this.listenTo(this.model, "destroy", this.destroy);
         }
+        addTodo: function(e) {
+            var text = this.getField("itemText");
+            this.model.addTodo(text);
+        },
     });
 
     SCF.registerComponent('scf-todo/components/hbs/todos', TodoList, TodoListView);

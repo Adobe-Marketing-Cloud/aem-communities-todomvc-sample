@@ -1,3 +1,23 @@
 <div data-component-id="{{id}}" data-scf-component="scf-todo/components/hbs/todos" class="scf scf-todos">
-    <h1>Todos</h1>
+    <h1>todos</h1>
+    <div class="scf-todos-box">
+        <div class="scf-new-todo-box">
+            <input placeholder="{{i18n "What needs to be done?"}}"/>
+        </div>
+        <ul class="scf-todos-list">
+            {{#each items}}
+                {{#if active}}
+                    <li class="scf-todo-item">
+                        <input type="checkbox" />
+                        <span>{{itemText}}</span>
+                    </li>
+                {{else}}
+                    <li class="scf-todo-item scf-is-done">
+                        <input type="checkbox" checked />
+                        <span>{{itemText}}</span>
+                    </li>
+                {{/if}}
+            {{/each}}
+        </ul>
+    </div>
 </div>

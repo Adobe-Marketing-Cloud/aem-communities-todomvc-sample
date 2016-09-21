@@ -1,3 +1,75 @@
+.scf-todos {
+    margin: 0 auto;
+    text-align: center;
+    font: 14px 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
 .scf-todos h1 {
-    color: skyblue;
+    width: 100%;
+    font-size: 100px;
+    font-weight: 100;
+    text-align: center;
+    color: rgba(175, 47, 47, 0.15);
+    margin: 0;
+}
+.scf-todos .scf-todos-box {
+    background: #fff;
+    margin: 0 auto;
+    position: relative;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 25px 50px 0 rgba(0, 0, 0, 0.1);
+    width: 600px;
+}
+.scf-todos .scf-new-todo-box {
+    padding: 16px 16px 16px 60px;
+    border: none;
+    background: rgba(0, 0, 0, 0.003);
+    box-shadow: inset 0 -2px 1px rgba(0,0,0,0.03);
+}
+.scf-todos .scf-new-todo-box input {
+    position: relative;
+    margin: 0;
+    width: 100%;
+    font-size: 24px;
+    font-family: inherit;
+    font-weight: 100;
+    font-style: italic;
+    line-height: 1.4em;
+    border: 0;
+    outline: none;
+    color: inherit;
+    padding: 6px;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    -moz-font-smoothing: antialiased;
+    font-smoothing: antialiased;
+}
+.scf-todos .scf-todos-list {
+    list-style: none;
+    padding: 0px;
+    text-align: left;
+    margin: 0;
+    font-weight: 200;
+}
+.scf-todos .scf-todo-item {
+    position: relative;
+    font-size: 24px;
+    border-bottom: 1px solid #ededed;
+    padding-left: 15px;
+    line-height: 1.2em;
+    white-space: pre-line;
+    word-break: break-all;
+    padding: 15px 60px 15px 15px;
+    display: block;
+    line-height: 1.2;
+    transition: color 0.4s;
+}
+.scf-todos .scf-todo-item input {
+    line-height: 1.2em;
+    vertical-align: middle;
+    display: inline-block;
+    margin-left: 10px;
+    margin-right: 25px;
+}
+.scf-todos .scf-todo-item.scf-is-done {
+    color: #d9d9d9;
+    text-decoration: line-through;
 }

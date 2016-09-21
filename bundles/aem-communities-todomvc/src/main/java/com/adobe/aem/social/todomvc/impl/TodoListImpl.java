@@ -48,7 +48,9 @@ public class TodoListImpl extends BaseSocialComponent implements TodoList {
     }
 
     private SocialComponent getTodoItemSocialComponent(final Resource item) {
-        return new TodoItemImpl(item, clientUtils);
+        final SocialComponentFactory factory =
+            this.clientUtils.getSocialComponentFactoryManager().getSocialComponentFactory(item);
+        return factory.getSocialComponent(item);
     }
 
     @Override

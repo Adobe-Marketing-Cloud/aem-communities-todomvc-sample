@@ -3,4 +3,4 @@
     jcr:primaryType="cq:ClientLibraryFolder"
     categories="[apps.scf.todomvc]"
     dependencies="[cq.shared,cq.social.scf]"
-    embed="[]"/>
+    embed="[app.libs.scf.todomvc]"/>

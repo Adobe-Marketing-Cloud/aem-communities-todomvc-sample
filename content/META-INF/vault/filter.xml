@@ -2,4 +2,5 @@
 <workspaceFilter version="1.0">
     <filter root="/apps/scf-todo"/>
     <filter root="/etc/clientlibs/scf-todo"/>
+    <filter root="/content/todos"/>
 </workspaceFilter>

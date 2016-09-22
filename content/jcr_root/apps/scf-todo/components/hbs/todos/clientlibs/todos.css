@@ -69,3 +69,7 @@
     border: 1px rgba(175, 47, 47, 0.1) solid;
     box-sizing: border-box;
 } 
+.scf-todos .scf-todos-count {
+    float: left;
+    margin-left: 25px;
+}

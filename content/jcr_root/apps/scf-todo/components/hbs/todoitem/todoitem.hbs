@@ -1,12 +1,12 @@
 <li data-component-id="{{id}}" data-scf-component="scf-todo/components/hbs/todoitem" class="scf scf-todo-item">
     {{#if active}}
         <div class="scf-todo-item-content">
-            <input type="checkbox" />
+            <input type="checkbox" evt="change=updateState"/>
             <span>{{itemText}}</span>
         </div>
     {{else}}
             <div class="scf-todo-item-content scf-is-done">
-                <input type="checkbox" checked />
+                <input type="checkbox" checked="checked" evt="change=updateState"/>
                 <span>{{itemText}}</span>
             </div>
     {{/if}}

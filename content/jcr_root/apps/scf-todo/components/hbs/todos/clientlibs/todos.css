@@ -49,3 +49,23 @@
     margin: 0;
     font-weight: 200;
 }
+.scf-todos .scf-todos-action-bar {
+    height: 50px;
+    line-height: 50px;
+    font-weight: 100;
+    font-size: 14px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2), 0 8px 0 -3px #f6f6f6, 0 9px 1px -3px rgba(0, 0, 0, 0.2), 0 16px 0 -6px #f6f6f6, 0 17px 2px -6px rgba(0, 0, 0, 0.2);
+}
+.scf-todos .scf-todos-action-bar .scf-todos-action-item {
+    padding: 3px 6px;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    margin: 0 5px;
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+}
+.scf-todos .scf-todos-action-bar .scf-todos-action-item:hover {
+    border: 1px rgba(175, 47, 47, 0.1) solid;
+    box-sizing: border-box;
+} 

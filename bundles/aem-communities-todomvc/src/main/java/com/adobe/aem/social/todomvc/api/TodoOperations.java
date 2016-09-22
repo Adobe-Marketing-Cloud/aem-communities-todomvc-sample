@@ -21,5 +21,5 @@ public interface TodoOperations {
 
     Resource updateStatus(final SlingHttpServletRequest request) throws OperationException;
 
-    Resource updateStatus(final Resource todoItem, boolean isDone) throws OperationException;
+    Resource updateStatus(final Resource todoItem, boolean isDone, String user) throws OperationException;
 }

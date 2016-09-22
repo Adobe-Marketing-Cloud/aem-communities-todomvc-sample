@@ -1,6 +1,8 @@
 package com.adobe.aem.social.todomvc.impl;
 
+import java.awt.Dialog.ModalExclusionType;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -9,12 +11,18 @@ import javax.jcr.Session;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.SlingHttpServletRequest;
+import org.apache.sling.api.resource.LoginException;
+import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.api.resource.ValueMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +45,11 @@ public class TodoOperationsServiceImpl extends
 
     @Reference
     private SocialUtils socialUtils;
+
+    @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY, policy = ReferencePolicy.STATIC)
+    protected ResourceResolverFactory resourceResolverFactory;
+
+    private static final String UGC_WRITER = "ugc-writer";
 
     public Resource create(SlingHttpServletRequest request) throws OperationException {
         final Resource todolist = request.getResource();
@@ -65,6 +78,7 @@ public class TodoOperationsServiceImpl extends
         props.put("jcr:date", date);
         props.put(CollabUser.PROP_NAME, owner);
         props.put(SocialUtils.PN_PARENTID, todolist.getPath() + "/" + owner);
+        props.put(SocialUtils.PROP_COMPONENT, todolist.getPath());
         props.put("sling:resourceType", "scf-todo/components/hbs/todoitem");
         props.put("jcr:primaryType", "nt:unstructured");
         // use the Resource API to create resource to make this data store agnostic
@@ -74,7 +88,7 @@ public class TodoOperationsServiceImpl extends
                 srp.create(resolver, socialUtils.resourceToUGCStoragePath(todolist) + "/" + owner + "/"
                         + createUniqueNameHint(text), props);
             resolver.commit();
-        } catch (PersistenceException e) {
+        } catch (final PersistenceException e) {
             LOG.error("Unable to create todo item", e);
             throw new OperationException("Unable to create todo item", 500);
         }
@@ -92,13 +106,42 @@ public class TodoOperationsServiceImpl extends
     }
 
     public Resource updateStatus(SlingHttpServletRequest request) throws OperationException {
-        // TODO Auto-generated method stub
-        return null;
+        final Resource todoItem = request.getResource();
+        final Session userSession = request.getResourceResolver().adaptTo(Session.class);
+        final String user = userSession.getUserID();
+        final boolean isDone = Boolean.parseBoolean(request.getParameter("isDone"));
+        return updateStatus(todoItem, isDone, user);
     }
 
-    public Resource updateStatus(Resource todoItem, boolean isDone) throws OperationException {
-        // TODO Auto-generated method stub
-        return null;
+    public Resource updateStatus(final Resource todoItem, final boolean isDone, final String user)
+        throws OperationException {
+        if (!todoItem.isResourceType("scf-todo/components/hbs/todoitem")) {
+            throw new OperationException("only todo items can be updated", 400);
+        }
+        final ValueMap props = todoItem.adaptTo(ValueMap.class);
+        final String owner = props.get(CollabUser.PROP_NAME, "");
+        final String currentUser = todoItem.getResourceResolver().getUserID();
+        final Resource todoList =
+            todoItem.getResourceResolver().getResource(props.get(SocialUtils.PROP_COMPONENT, ""));
+        if (!socialUtils.mayPost(todoItem.getResourceResolver(), todoList) && !StringUtils.equals(owner, currentUser)) {
+            throw new OperationException("cannot create todos", 400);
+        }
+        ResourceResolver ugcResolver = null;
+        try {
+            ugcResolver = getUGCWriterResolver();
+            final Resource modifiableTodoItem = ugcResolver.getResource(todoItem.getPath());
+            final ModifiableValueMap modProps = modifiableTodoItem.adaptTo(ModifiableValueMap.class);
+            modProps.put("isDone_b", isDone);
+            ugcResolver.commit();
+        } catch (final PersistenceException e) {
+            LOG.error("Unable to update todo item", e);
+            throw new OperationException("Unable to update todo item", 500);
+        } finally {
+            if (ugcResolver != null && ugcResolver.isLive()) {
+                ugcResolver.close();
+            }
+        }
+        return todoItem;
     }
 
     private SocialResourceProvider initializeSRPForTodos(final Resource todolist) {
@@ -120,6 +163,15 @@ public class TodoOperationsServiceImpl extends
             nodeName.append(message);
         }
         return nodeName.toString();
+    }
+
+    private ResourceResolver getUGCWriterResolver() throws OperationException {
+        try {
+            return resourceResolverFactory.getServiceResourceResolver(Collections.singletonMap(
+                ResourceResolverFactory.SUBSERVICE, (Object) UGC_WRITER));
+        } catch (LoginException e) {
+            throw new OperationException("Not allowed", e, 400);
+        }
     }
 
 }

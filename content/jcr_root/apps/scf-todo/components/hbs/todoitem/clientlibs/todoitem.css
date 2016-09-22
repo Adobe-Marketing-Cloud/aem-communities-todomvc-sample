@@ -1,0 +1,25 @@
+.scf-todo-item .scf-todo-item-content {
+    position: relative;
+    font-size: 24px;
+    border-bottom: 1px solid #ededed;
+    padding-left: 15px;
+    line-height: 1.2em;
+    word-break: break-all;
+    display: block;
+    line-height: 1.2;
+    transition: color 0.4s;
+    padding: 15px;
+}
+
+.scf-todo-item .scf-todo-item-content input {
+    line-height: 1.2em;
+    vertical-align: middle;
+    display: inline-block;
+    margin-left: 10px;
+    margin-right: 25px;
+}
+
+.scf-todo-item .scf-todo-item .scf-is-done {
+    color: #d9d9d9;
+    text-decoration: line-through;
+}

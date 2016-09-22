@@ -1,0 +1,13 @@
+<li data-component-id="{{id}}" data-scf-component="scf-todo/components/hbs/todoitem" class="scf scf-todo-item">
+    {{#if active}}
+        <div class="scf-todo-item-content">
+            <input type="checkbox" />
+            <span>{{itemText}}</span>
+        </div>
+    {{else}}
+            <div class="scf-todo-item-content scf-is-done">
+                <input type="checkbox" checked />
+                <span>{{itemText}}</span>
+            </div>
+    {{/if}}
+</li>

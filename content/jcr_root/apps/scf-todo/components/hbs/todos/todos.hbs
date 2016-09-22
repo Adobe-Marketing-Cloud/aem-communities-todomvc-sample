@@ -6,17 +6,7 @@
         </div>
         <ul class="scf-todos-list">
             {{#each items}}
-                {{#if active}}
-                    <li class="scf-todo-item">
-                        <input type="checkbox" />
-                        <span>{{itemText}}</span>
-                    </li>
-                {{else}}
-                    <li class="scf-todo-item scf-is-done">
-                        <input type="checkbox" checked />
-                        <span>{{itemText}}</span>
-                    </li>
-                {{/if}}
+                {{include this}}
             {{/each}}
         </ul>
     </div>

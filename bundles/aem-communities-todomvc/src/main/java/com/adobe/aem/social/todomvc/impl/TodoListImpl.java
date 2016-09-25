@@ -39,13 +39,16 @@ import com.adobe.cq.social.ugcbase.SocialUtils;
 
 public class TodoListImpl extends BaseSocialComponent implements TodoList {
 
-    final String currentUser;
-    final String pathToUserTodos;
-    final SocialResourceProvider srp;
-    final Resource todoListComponent;
-    final Resource usersList;
-    final ClientUtilities clientUtils;
-    final QueryRequestInfo query;
+    final private String currentUser;
+    final private String pathToUserTodos;
+    final private SocialResourceProvider srp;
+    final private Resource todoListComponent;
+    final private Resource usersList;
+    final private ClientUtilities clientUtils;
+    final private QueryRequestInfo query;
+    private int filteredSize = 0;
+    private boolean listInitialized = false;
+    private List<Object> todoItems;
 
     public TodoListImpl(final Resource resource, final ClientUtilities clientUtils, final QueryRequestInfo query,
         final SocialUtils socialUtils, final SocialResourceProvider srp) {
@@ -61,13 +64,16 @@ public class TodoListImpl extends BaseSocialComponent implements TodoList {
 
     @Override
     public List<Object> getItems() {
-        Iterator<Resource> items = query.isQuery() ? getFilteredItems() : getAllItems();
-        List<Object> todoItems = new ArrayList<Object>();
-        while (items.hasNext()) {
-            final Resource item = items.next();
-            todoItems.add(getTodoItemSocialComponent(item));
+        if (!listInitialized) {
+            Iterator<Resource> items = query.isQuery() ? getFilteredItems() : getAllItems();
+            this.todoItems = new ArrayList<Object>();
+            while (items.hasNext()) {
+                final Resource item = items.next();
+                todoItems.add(getTodoItemSocialComponent(item));
+            }
+            listInitialized = true;
         }
-        return todoItems;
+        return this.todoItems;
     }
 
     private Iterator<Resource> getFilteredItems() {
@@ -82,7 +88,8 @@ public class TodoListImpl extends BaseSocialComponent implements TodoList {
         if (StringUtils.equals("done", requestedFilter)) {
             stateGroup.addConstraint(new ValueConstraint<Boolean>("isDone_b", Boolean.TRUE));
         } else if (StringUtils.equals("active", requestedFilter)) {
-            stateGroup.addConstraint(new ValueConstraint<Boolean>("isDone_b", Boolean.TRUE, ComparisonType.NotEquals));
+            stateGroup
+                .addConstraint(new ValueConstraint<Boolean>("isDone_b", Boolean.TRUE, ComparisonType.NotEquals));
         } else {
             return getAllItems();
         }
@@ -91,13 +98,15 @@ public class TodoListImpl extends BaseSocialComponent implements TodoList {
             todoListComponent.getResourceResolver().adaptTo(SocialResourceUtilities.class)
                 .resourceToUGCStoragePath(usersList);
         final ConstraintGroup pathFilters = new ConstraintGroup(Operator.And);
-        pathFilters.addConstraint(new PathConstraint(ugcParentPath, PathConstraintType.IsDescendantNode, Operator.Or));
+        pathFilters
+            .addConstraint(new PathConstraint(ugcParentPath, PathConstraintType.IsDescendantNode, Operator.Or));
         filter.and(pathFilters);
         filter.addSort(new UgcSort("added", Direction.Asc));
         final UgcSearch search = todoListComponent.getResourceResolver().adaptTo(UgcSearch.class);
         try {
             SearchResults<Resource> results =
                 search.find(null, todoListComponent.getResourceResolver(), filter, 0, 100000, true);
+            this.filteredSize = Math.toIntExact(results.getTotalNumberOfResults());
             return results.getResults().iterator();
         } catch (final RepositoryException e) {
             // TODO log error message
@@ -119,7 +128,10 @@ public class TodoListImpl extends BaseSocialComponent implements TodoList {
 
     @Override
     public int getTotalSize() {
-        return Math.toIntExact(srp.countChildren(usersList));
+        if (!listInitialized) {
+            getItems();
+        }
+        return this.query.isQuery() ? this.filteredSize : Math.toIntExact(srp.countChildren(usersList));
     }
 
     @Override

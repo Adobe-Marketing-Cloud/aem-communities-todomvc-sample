@@ -1,6 +1,6 @@
 package com.adobe.aem.social.todomvc.impl;
 
-import java.awt.Dialog.ModalExclusionType;
+import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
@@ -33,6 +33,7 @@ import com.adobe.aem.social.todomvc.api.TodoOperations;
 import com.adobe.cq.social.scf.OperationException;
 import com.adobe.cq.social.scf.core.operations.AbstractOperationService;
 import com.adobe.cq.social.srp.SocialResourceProvider;
+import com.adobe.cq.social.srp.utilities.api.SocialResourceUtilities;
 import com.adobe.cq.social.ugcbase.CollabUser;
 import com.adobe.cq.social.ugcbase.SocialUtils;
 
@@ -43,13 +44,14 @@ public class TodoOperationsServiceImpl extends
 
     private static final Logger LOG = LoggerFactory.getLogger(TodoOperationsServiceImpl.class);
 
-    @Reference
-    private SocialUtils socialUtils;
-
     @Reference(cardinality = ReferenceCardinality.MANDATORY_UNARY, policy = ReferencePolicy.STATIC)
     protected ResourceResolverFactory resourceResolverFactory;
 
     private static final String UGC_WRITER = "ugc-writer";
+
+    private static SecureRandom randomGenerator = new SecureRandom();
+    private static final char[] RANDOM_CHARS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        .toCharArray();
 
     public Resource create(SlingHttpServletRequest request) throws OperationException {
         final Resource todolist = request.getResource();
@@ -70,7 +72,8 @@ public class TodoOperationsServiceImpl extends
             throw new OperationException("todo items can only be created under a todo list component", 400);
         }
         final SocialResourceProvider srp = initializeSRPForTodos(todolist);
-        if (!socialUtils.mayPost(resolver, todolist)) {
+        final SocialResourceUtilities sru = resolver.adaptTo(SocialResourceUtilities.class);
+        if (!sru.checkPermission(resolver, sru.resourceToACLPath(todolist), Session.ACTION_ADD_NODE)) {
             throw new OperationException("cannot create todos", 400);
         }
         Map<String, Object> props = new HashMap<String, Object>(5);
@@ -85,7 +88,7 @@ public class TodoOperationsServiceImpl extends
         Resource item;
         try {
             item =
-                srp.create(resolver, socialUtils.resourceToUGCStoragePath(todolist) + "/" + owner + "/"
+                srp.create(resolver, sru.resourceToUGCStoragePath(todolist) + "/" + owner + "/"
                         + createUniqueNameHint(text), props);
             resolver.commit();
         } catch (final PersistenceException e) {
@@ -121,9 +124,11 @@ public class TodoOperationsServiceImpl extends
         final ValueMap props = todoItem.adaptTo(ValueMap.class);
         final String owner = props.get(CollabUser.PROP_NAME, "");
         final String currentUser = todoItem.getResourceResolver().getUserID();
+        final SocialResourceUtilities sru = todoItem.getResourceResolver().adaptTo(SocialResourceUtilities.class);
         final Resource todoList =
             todoItem.getResourceResolver().getResource(props.get(SocialUtils.PROP_COMPONENT, ""));
-        if (!socialUtils.mayPost(todoItem.getResourceResolver(), todoList) && !StringUtils.equals(owner, currentUser)) {
+        if (!!sru.checkPermission(todoItem.getResourceResolver(), sru.resourceToACLPath(todoList), Session.ACTION_ADD_NODE)
+                && !StringUtils.equals(owner, currentUser)) {
             throw new OperationException("cannot create todos", 400);
         }
         ResourceResolver ugcResolver = null;
@@ -145,15 +150,16 @@ public class TodoOperationsServiceImpl extends
     }
 
     private SocialResourceProvider initializeSRPForTodos(final Resource todolist) {
-        socialUtils.getUGCResource(todolist);
-        SocialResourceProvider srp = socialUtils.getSocialResourceProvider(todolist);
-        srp.setConfig(socialUtils.getDefaultStorageConfig());
+        final SocialResourceUtilities sru = todolist.getResourceResolver().adaptTo(SocialResourceUtilities.class);
+        sru.getUGCResource(todolist);
+        SocialResourceProvider srp = sru.getSocialResourceProvider(todolist);
+        srp.setConfig(sru.getStorageConfig(todolist));
         return srp;
     }
 
     private String createUniqueNameHint(String message) {
         StringBuilder nodeName;
-        nodeName = new StringBuilder(socialUtils.generateRandomString(6)).append("-");
+        nodeName = new StringBuilder(generateRandomString(6)).append("-");
         message = message.replaceAll("\\<.*?>", "");
         message = message.replaceAll("\\&.*?\\;", "");
         message = message.replaceAll(" ", "-");
@@ -172,6 +178,14 @@ public class TodoOperationsServiceImpl extends
         } catch (LoginException e) {
             throw new OperationException("Not allowed", e, 400);
         }
+    }
+
+    private String generateRandomString(final int length) {
+        final StringBuilder str = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            str.append(RANDOM_CHARS[randomGenerator.nextInt(RANDOM_CHARS.length)]);
+        }
+        return str.toString();
     }
 
 }

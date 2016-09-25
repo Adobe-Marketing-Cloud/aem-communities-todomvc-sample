@@ -26,3 +26,4 @@ node_modules
 license.properties
 crx-quickstart
 *.log
+bin

@@ -19,15 +19,15 @@
     width: 600px;
 }
 .scf-todos .scf-new-todo-box {
-    padding: 16px 16px 16px 60px;
+    padding: 16px 16px 16px 16px;
     border: none;
     background: rgba(0, 0, 0, 0.003);
     box-shadow: inset 0 -2px 1px rgba(0,0,0,0.03);
+    height: 45px;
 }
 .scf-todos .scf-new-todo-box input {
-    position: relative;
     margin: 0;
-    width: 100%;
+    width: 80%;
     font-size: 24px;
     font-family: inherit;
     font-weight: 100;
@@ -41,6 +41,17 @@
     -webkit-font-smoothing: antialiased;
     -moz-font-smoothing: antialiased;
     font-smoothing: antialiased;
+    display: inline;
+    margin-left: 60px;
+    position: absolute;
+    left: 20px;
+}
+.scf-todos .scf-composer-avatar {
+    display: inline;
+    position: absolute;
+    left: 25px;
+    top: 22px;
+    border-radius: 15px;
 }
 .scf-todos .scf-todos-list {
     list-style: none;

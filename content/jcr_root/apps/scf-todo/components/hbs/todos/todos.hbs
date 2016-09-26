@@ -2,6 +2,7 @@
     <h1>todos</h1>
     <div class="scf-todos-box">
         <div class="scf-new-todo-box">
+            <img class="scf-composer-avatar" src="{{loggedInUser.avatarUrl}}" />
             <input data-attrib = "itemText" placeholder="{{i18n "What needs to be done?"}}" evt="keypress=checkForEnter"/>
         </div>
         <ul class="scf-todos-list">
